@@ -12,18 +12,20 @@ const questions = [
 ];
 
 let currentQuestionIndex = 0;
+let answers = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     displayQuestion();
-    
+
     document.getElementById('nextButton').addEventListener('click', function() {
         const answer = document.getElementById('answerInput').value;
         if (answer) {
-            // Store or process the answer if needed
+            answers.push({ question: questions[currentQuestionIndex], answer: answer });
             currentQuestionIndex++;
             if (currentQuestionIndex < questions.length) {
                 displayQuestion();
             } else {
+                sendSurveyData(answers);
                 document.getElementById('questionContainer').style.display = 'none';
                 document.getElementById('surveyCompletionMessage').style.display = 'block';
             }
@@ -34,4 +36,21 @@ document.addEventListener('DOMContentLoaded', function() {
 function displayQuestion() {
     document.getElementById('questionText').textContent = questions[currentQuestionIndex];
     document.getElementById('answerInput').value = '';
+}
+
+function sendSurveyData(answers) {
+    fetch('http://localhost:3000/submitSurvey', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ answers: answers })
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
 }
